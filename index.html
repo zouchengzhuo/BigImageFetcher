@@ -1,0 +1,51 @@
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="css/bootstrap.min.css"/>
+<link rel="stylesheet" href="css/google-bootstrap.css"/>
+<style type="text/css">
+    .wrapper{
+        width: 500px;
+        height: 300px;
+    }
+    input{
+        box-sizing: content-box;
+    }
+</style>
+<div class="wrapper">
+    <div class="form-horizontal">
+        <fieldset>
+            <legend>大图抓取工具</legend>
+            <div class="control-group">
+                <label class="control-label" for="keyword">关键词</label>
+                <div class="controls">
+                    <input type="text" id="keyword" placeholder="抓取关键词">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label" for="max">抓取数量</label>
+                <div class="controls">
+                    <input type="number" min="1" id="max" placeholder="抓取数量" value="500">
+                </div>
+            </div>
+            <div class="control-group">
+                <label class="control-label">抓取网站</label>
+                <div class="controls">
+                    <label class="radio inline">
+                        <input type="radio" name="site" id="optionsRadios1" value="google" checked>
+                        谷歌图片
+                    </label>
+                    <label class="radio inline">
+                        <input type="radio" name="site" id="optionsRadios2" value="baidu">
+                        百度图片
+                    </label>
+                </div>
+            </div>
+            <div class="control-group">
+                <div class="controls">
+                    <button  class="btn btn-primary" id="fetch">开始抓取</button>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    <script src="lib/jquery-2.0.0.min.js"></script>
+    <script src="dist/popup.js"></script>
+</div>
