@@ -7,10 +7,14 @@ module.exports={
     entry: {
         popup:'./src/popup/popup.js',
         background:'./src/background/background.js',
-        inject:'./src/inject/inject.js'
+        inject:'./src/inject/inject.js',
+        select:'./src/select/select.js'
     },
     output:{
         path:path.resolve(__dirname, "./dist"),
         filename:'[name].js'
-    }
+    },
+    externals: {
+        'vue': 'Vue'
+    },
 }

@@ -2,50 +2,80 @@
 <link rel="stylesheet" href="css/bootstrap.min.css"/>
 <link rel="stylesheet" href="css/google-bootstrap.css"/>
 <style type="text/css">
-    .wrapper{
-        width: 500px;
-        height: 300px;
+    #wrapper{
+        min-width: 600px;
+        min-height: 500px;
+        padding: 20px;
     }
     input{
         box-sizing: content-box;
     }
+    td{
+        vertical-align: middle !important;
+    }
+    .progress{
+        margin-bottom: 0 !important;
+    }
 </style>
-<div class="wrapper">
+<div id="wrapper">
     <div class="form-horizontal">
         <fieldset>
-            <legend>大图抓取工具</legend>
+            <legend>大图抓取工具&nbsp<span class="label label-important">抓取时请勿关闭网页</span></legend>
             <div class="control-group">
                 <label class="control-label" for="keyword">关键词</label>
                 <div class="controls">
-                    <input type="text" id="keyword" placeholder="抓取关键词">
+                    <input type="text" id="keyword" v-model="fetchParam.keyword" placeholder="抓取关键词,多个以','分隔">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label" for="max">抓取数量</label>
                 <div class="controls">
-                    <input type="number" min="1" id="max" placeholder="抓取数量" value="500">
+                    <input type="number" min="1" id="max" placeholder="抓取数量" v-model="fetchParam.max">
                 </div>
             </div>
             <div class="control-group">
                 <label class="control-label">抓取网站</label>
                 <div class="controls">
-                    <label class="radio inline">
-                        <input type="radio" name="site" id="optionsRadios1" value="google" checked>
-                        谷歌图片
-                    </label>
-                    <label class="radio inline">
-                        <input type="radio" name="site" id="optionsRadios2" value="baidu">
-                        百度图片
+                    <label v-for="site in SITES" class="radio inline">
+                        <input v-model="fetchParam.site" type="radio" name="site" v-bind:value="site.value"  />
+                        {{site.name}}
                     </label>
                 </div>
             </div>
             <div class="control-group">
                 <div class="controls">
-                    <button  class="btn btn-primary" id="fetch">开始抓取</button>
+                    <button  class="btn btn-primary" @click="fetch">开始抓取</button>
                 </div>
             </div>
         </fieldset>
     </div>
-    <script src="lib/jquery-2.0.0.min.js"></script>
+    <div class="well well-small">
+        当前页面：{{tab_id}} <button class="btn btn-small btn-link" v-on:click="reload">刷新</button>
+    </div>
+    <table class="table table-bordered">
+        <tr><th>页面ID</th><th>关键词</th><th>站点</th><th>条数</th><th>状态</th><th>操作</th></tr>
+        <tr v-for="fetch in FETCH_ITEMS" track-by="$index">
+            <td v-text="fetch.tab_id"></td>
+            <td v-text="fetch.keyword"></td>
+            <td v-text="fetch.site.name"></td>
+            <td>
+                <div class="progress progress-striped active">
+                    <div class="bar bar-success" :style="{ 'width': (fetch.urls.length/+fetch.max)*100 + '%' }" v-text="fetch.urls.length+'/'+fetch.max"></div>
+                </div>
+            </td>
+            <td>
+                <span :class="['label',{'label-success':fetch.status==DOWNLOAD_STATUS.SUCCESS,'label-danger':fetch.status==DOWNLOAD_STATUS.ERROR,'label-warning':fetch.status==DOWNLOAD_STATUS.INIT,'label-info':fetch.status==DOWNLOAD_STATUS.DOWNLOADING}]"
+                      v-text="fetch.status"></span>
+            </td>
+            <td>
+                <button class="btn btn-small btn-success"
+                        v-on:click="select(fetch.tab_id)"
+                        v-bind:disabled="fetch.status!=DOWNLOAD_STATUS.SUCCESS">筛选</button>
+                <button class="btn btn-small btn-danger"
+                        v-on:click="stop(fetch.tab_id)">删除</button>
+            </td>
+        </tr>
+    </table>
+    <script src="lib/vue-csp/vue.js"></script>
     <script src="dist/popup.js"></script>
 </div>

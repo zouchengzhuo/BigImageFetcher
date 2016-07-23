@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+</head>
+<body>
+    <img src="http://img2.imgtn.bdimg.com/it/u=1448077422,73818242&fm=206&gp=0.jpg" id="t1"/>
+    <button id="down">asd</button>
+    <button id="down2">agsa</button>
+    <script type="text/javascript" src="lib/zip/zip.js"></script>
+    <script type="text/javascript" src="lib/zip/zip-fs.js"></script>
+
+<script>
+    function saveFile(data, filename){
+        var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+        save_link.href = data;
+        save_link.download = filename;
+        var event = document.createEvent('MouseEvents');
+        event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        save_link.dispatchEvent(event);
+    };
+    var _fixType = function(type) {
+        type = type.toLowerCase().replace(/jpg/i, 'jpeg');
+        var r = type.match(/png|jpeg|bmp|gif/)[0];
+        return 'image/' + r;
+    };
+
+    zip.useWebWorkers = true;
+    zip.workerScriptsPath = './lib/zip/';
+    var zipFs = new zip.fs.FS();
+    //var img=document.getElementById("t1");
+    var img=new Image();
+    //img.setAttribute('crossOrigin', 'anonymous');
+    img.crossOrigin = "*"
+    img.src="http://img2.imgtn.bdimg.com/it/u=1448077422,73818242&fm=206&gp=0.jpg";
+    var canvas,imgData;
+    img.onload=function(arg1,arg2){
+        canvas= document.createElement("canvas");
+        //document.body.appendChild(canvas)
+        canvas.height = img.height;
+        canvas.width = img.width;
+        var context=canvas.getContext("2d");
+        context.drawImage(img,0,0);
+        imgData = canvas.toDataURL("jpg");
+        imgData = imgData.replace(_fixType("jpg"),'image/octet-stream');//base64
+        zipFs.root.addData64URI("aaa.txt", "data:text/plain;base64,TG9yZW0gaXBzdW0gZG9sb3Igc2l0IGFtZXQsIGNvbnNlY3RldHVlciBhZGlwaXNjaW5nIGVsaXQsIHNlZCBkaWFtIG5vbnVtbXkgbmliaCBldWlzbW9kIHRpbmNpZHVudCB1dCBsYW9yZWV0IGRvbG9yZSBtYWduYSBhbGlxdWFtIGVyYXQgdm9sdXRwYXQuIFV0IHdpc2kgZW5pbSBhZCBtaW5pbSB2ZW5pYW0sIHF1aXMgbm9zdHJ1ZCBleGVyY2kgdGF0aW9uIHVsbGFtY29ycGVyIHN1c2NpcGl0IGxvYm9ydGlzIG5pc2wgdXQgYWxpcXVpcCBleCBlYSBjb21tb2RvIGNvbnNlcXVhdC4gRHVpcyBhdXRlbSB2ZWwgZXVtIGlyaXVyZSBkb2xvciBpbiBoZW5kcmVyaXQgaW4gdnVscHV0YXRlIHZlbGl0IGVzc2UgbW9sZXN0aWUgY29uc2VxdWF0LCB2ZWwgaWxsdW0gZG9sb3JlIGV1IGZldWdpYXQgbnVsbGEgZmFjaWxpc2lzIGF0IHZlcm8gZXJvcyBldCBhY2N1bXNhbiBldCBpdXN0byBvZGlvIGRpZ25pc3NpbSBxdWkgYmxhbmRpdCBwcmFlc2VudCBsdXB0YXR1bSB6enJpbCBkZWxlbml0IGF1Z3VlIGR1aXMgZG9sb3JlIHRlIGZldWdhaXQgbnVsbGEgZmFjaWxpc2kuIE5hbSBsaWJlciB0ZW1wb3IgY3VtIHNvbHV0YSBub2JpcyBlbGVpZmVuZCBvcHRpb24gY29uZ3VlIG5paGlsIGltcGVyZGlldCBkb21pbmcgaWQgcXVvZCBtYXppbSBwbGFjZXJhdCBmYWNlciBwb3NzaW0gYXNzdW0uIFR5cGkgbm9uIGhhYmVudCBjbGFyaXRhdGVtIGluc2l0YW07IGVzdCB1c3VzIGxlZ2VudGlzIGluIGlpcyBxdWkgZmFjaXQgZW9ydW0gY2xhcml0YXRlbS4gSW52ZXN0aWdhdGlvbmVzIGRlbW9uc3RyYXZlcnVudCBsZWN0b3JlcyBsZWdlcmUgbWUgbGl1cyBxdW9kIGlpIGxlZ3VudCBzYWVwaXVzLiBDbGFyaXRhcyBlc3QgZXRpYW0gcHJvY2Vzc3VzIGR5bmFtaWN1cywgcXVpIHNlcXVpdHVyIG11dGF0aW9uZW0gY29uc3VldHVkaXVtIGxlY3RvcnVtLiBNaXJ1bSBlc3Qgbm90YXJlIHF1YW0gbGl0dGVyYSBnb3RoaWNhLCBxdWFtIG51bmMgcHV0YW11cyBwYXJ1bSBjbGFyYW0sIGFudGVwb3N1ZXJpdCBsaXR0ZXJhcnVtIGZvcm1hcyBodW1hbml0YXRpcyBwZXIgc2VhY3VsYSBxdWFydGEgZGVjaW1hIGV0IHF1aW50YSBkZWNpbWEuIEVvZGVtIG1vZG8gdHlwaSwgcXVpIG51bmMgbm9iaXMgdmlkZW50dXIgcGFydW0gY2xhcmksIGZpYW50IHNvbGxlbW5lcyBpbiBmdXR1cnVtLg==");
+
+    }
+    document.getElementById("down").addEventListener("click",function(){
+        saveFile(imgData,"test_"+new Date().getTime()+"."+"jpg");
+    });
+
+    var zipFs = new zip.fs.FS();
+
+
+    document.getElementById("down2").addEventListener("click",function(){
+        zipFs.exportData64URI(function(zippedDataURI){
+            saveFile(zippedDataURI,"0.zip");
+        },function(){},function(){
+            debugger;
+        })
+    });
+
+
+</script>
+</body>
+</html>

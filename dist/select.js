@@ -45,33 +45,118 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
-	 * Created by czzou on 2016/7/22.
+	 * Created by zm on 2016/7/24.
 	 */
-
 	var Q=__webpack_require__(2);
-	var utils=__webpack_require__(5);
-	var ACTION=utils.ACTION;
-	var SITES=utils.SITES;
+	var Vue=__webpack_require__(12);
+	var getDataUrl=__webpack_require__(13);
+	var getSuffix=__webpack_require__(14);
+	var saveFile=__webpack_require__(15);
+
+	var FETCH_ITEMS=chrome.extension.getBackgroundPage().FETCH_ITEMS;
+	var tab_id=location.href.match(/tab_id=(\d+)/)[1];
+	if(!tab_id){
+	    tab_id=FETCH_ITEMS[0].tab_id;
+	}
+	if(!tab_id){
+	    alert("尚未未完成任何抓取！")
+	}
+	tab_id=parseInt(tab_id);
+	var fetch=FETCH_ITEMS.getByTabId(tab_id);
+	var vm=window.vm=new Vue({
+	    el: 'body',
+	    data: {
+	        downloading:false,
+	        tab_id:tab_id,
+	        selectedNum:fetch.urls.length,
+	        fetch:fetch,
+	        FETCH_ITEMS: FETCH_ITEMS,
+	    },
+	    methods:{
+	        select:function(url){
+	            url.selected=!url.selected;
+	            updateNum();
+	        },
+	        selectAll:function(url){
+	            fetch.urls.forEach(function(url){
+	                url.selected=true;
+	            });
+	            updateNum();
+	        },
+	        unselectAll:function(){
+	            fetch.urls.forEach(function(url){
+	                url.selected=false;
+	            });
+	            updateNum();
+	        },
+	        error:function(url){
+	            url.selected=false;
+	            updateNum();
+	        },
+	        load:function(url,e){
+	            url.img=e.srcElement;
+	        },
+	        download:function(){
+	            vm.downloading=true;
+	            zip.useWebWorkers = true;
+	            zip.workerScriptsPath = './lib/zip/';
+	            var zipFs = new zip.fs.FS();
+
+	            var queue=[];
+	            //获取dataurl
+	            fetch.urls.forEach(function(url){
+	                if(!url.selected) return;
+	                queue.push(getDataUrl(url));
+	            });
+	            //存入zi
 
 
-	var fetcher;
-	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-	    var data=request.data;
-	    //开始抓取
-	    if(request.action==ACTION.START_FETCH){
-	        var site=SITES.getSite(data.site);
-	        if(!site){
-	            sendResponse({err:1,message:"未实现此网页抓取"});
-	            return;
+	            Q.all(queue).then(function(data){
+	                data.forEach(function(item,index){
+	                    if(item==-1) return;
+	                    zipFs.root.addData64URI(index+getSuffix(item),item);
+	                });
+	            }).done(function(){
+	                //下载
+	                //zipFs.exportData64URI
+	                zipFs.exportBlob(function(zippedDataURI){
+	                    saveFile(zippedDataURI,fetch.keyword+"_"+fetch.site.name+"_"+new Date().getTime()+".zip",function(){
+	                        vm.downloading=false;
+	                    });
+	                    //saveFile(zippedDataURI,new Date().getTime()+".zip");
+	                },function(){},function(){
+	                    alert("下载出错")
+	                })
+	            });
+	            //var queue=Q(-1);
+	            //var index=1;
+	            //fetch.urls.forEach(function(url){
+	            //    if(!url.selected) return;
+	            //    queue=queue.then(function(){
+	            //        return getDataUrl(url)
+	            //    }).then(function(data){
+	            //        if(data==-1) return;
+	            //        zipFs.root.addData64URI((index++)+getSuffix(data),data);
+	            //    })
+	            //});
+	            //queue.then(function(){
+	            //    //下载
+	            //    zipFs.exportBlob(function(zippedBlob){
+	            //        saveFile(zippedBlob,fetch.keyword+"_"+fetch.site.name+"_"+new Date().getTime()+".zip",function(){
+	            //            vm.downloading=false;
+	            //        });
+	            //        //saveFile(zippedDataURI,new Date().getTime()+".zip");
+	            //    },function(){},function(){
+	            //        alert("下载出错")
+	            //    })
+	            //}).done();
 	        }
-	        sendResponse({err:0});
-	        fetcher=__webpack_require__(8)("./"+data.site);
-	        fetcher(data).then(function(urls){
-	            data.urls=urls;
-	            chrome.runtime.sendMessage({action:ACTION.FETCH_SUCCESS, data:data}); //发送给background
-	        }).done()
 	    }
 	});
+	function updateNum(){
+	    var num=fetch.urls.filter(function(item){return item.selected}).length;
+	    vm.selectedNum=num;
+	}
 
 /***/ },
 /* 1 */,
@@ -2337,191 +2422,113 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4).setImmediate, __webpack_require__(4).clearImmediate))
 
 /***/ },
-/* 5 */
+/* 5 */,
+/* 6 */,
+/* 7 */,
+/* 8 */,
+/* 9 */,
+/* 10 */,
+/* 11 */,
+/* 12 */
+/***/ function(module, exports) {
+
+	module.exports = Vue;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Created by zm on 2016/7/24.
+	 */
+	var Q=__webpack_require__(2);
+
+	function getImgDom(url){
+	    var dfd= Q.defer();
+	    if(url.img){
+	        setTimeout(function(){
+	            dfd.resolve(url.img);
+	        })
+	    }
+	    else{
+	        var img=new Image();
+	        img.crossOrigin = "*";
+	        img.src=url.url;
+	        img.onload=function(){
+	            dfd.resolve(img);
+	        }
+	        img.onerror=function(){
+	            dfd.resolve(-1);
+	        }
+	    }
+	    return dfd.promise;
+	}
+
+	module.exports=function(url){
+	    var dfd= Q.defer();
+	    getImgDom(url).then(function(img){
+	        if(img==-1){
+	            dfd.resolve(img);
+	            reutrn;
+	        }
+	        var canvas= document.createElement("canvas");
+	        var context=canvas.getContext("2d");
+	        canvas.height=img.naturalHeight;
+	        canvas.width=img.naturalWidth;
+	        context.drawImage(img,0,0);
+	        imgData = canvas.toDataURL();
+	        dfd.resolve(imgData);
+	    });
+	    return dfd.promise;
+	}
+
+/***/ },
+/* 14 */
 /***/ function(module, exports) {
 
 	/**
-	 * Created by czzou on 2016/7/22.
+	 * Created by zm on 2016/7/24.
 	 */
-	var ACTION ={
-	    SET_URL:"set_url",
-	    START_FETCH:"start_fetch",
-	    FETCH_PROGTRESS:"fetch_progress",
-	    FETCH_SUCCESS:"fetch_success"
+	function getSuffix(dataUrl){
+	    var head=dataUrl.slice(0,16).match(/png|jpeg|bmp|gif/)[0];
+	    return "."+head;
 	}
+	module.exports=getSuffix;
 
-	var DOWNLOAD_STATUS={
-	    INIT:"准备中",
-	    DOWNLOADING:"抓取中",
-	    SUCCESS:"抓取完成",
-	    ERROR:"抓取出错"
-	}
-	//站点列表
-	var SITES=[
-	    {
-	        name:"百度图片",
-	        value:"baidu_image",
-	        createUrl:function(data){
-	            return "http://image.baidu.com/search/index?tn=baiduimage&word="+encodeURIComponent(data.keyword);
-	        }
-	    },
-	    {
-	        name:"谷歌图片",
-	        value:"google_image",
-	        createUrl:function(data){
-	            return "http://image.baidu.com/search/index?tn=baiduimage&word="+encodeURIComponent(data.keyword);
-	        }
+/***/ },
+/* 15 */
+/***/ function(module, exports) {
+
+	/**
+	 * Created by zm on 2016/7/24.
+	 */
+	function saveFile2(data, filename){
+	    var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+	    save_link.href = data;
+	    save_link.download = filename;
+	    var event = document.createEvent('MouseEvents');
+	    event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+	    save_link.dispatchEvent(event);
+	};
+	function saveFile(blob, filename,callback){
+	    var type = blob.type;
+	    var force_saveable_type = 'application/octet-stream';
+	    //var force_saveable_type = 'application/zip';
+	    if (type && type != force_saveable_type) { // 强制下载，而非在浏览器中打开
+	        var slice = blob.slice || blob.webkitSlice || blob.mozSlice;
+	        blob = slice.call(blob, 0, blob.size, force_saveable_type);
 	    }
-	];
-	/**
-	 * 根据value获取site
-	 * @param value
-	 */
-	SITES.getSite=function(value){
-	    return SITES.filter(function(item){
-	        return item.value==value;
-	    })[0];
-	}
-
-	exports.ACTION=ACTION;
-	exports.DOWNLOAD_STATUS=DOWNLOAD_STATUS;
-	exports.SITES=SITES;
-
-/***/ },
-/* 6 */,
-/* 7 */,
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var map = {
-		"./baidu_image": 9,
-		"./baidu_image.js": 9,
-		"./google_image": 11,
-		"./google_image.js": 11
+	    var url = URL.createObjectURL(blob);
+	    var save_link = document.createElementNS('http://www.w3.org/1999/xhtml', 'a');
+	    save_link.href = url;
+	    save_link.download = filename;
+	    var event = document.createEvent('MouseEvents');
+	    event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+	    save_link.dispatchEvent(event);
+	    URL.revokeObjectURL(url);
+	    if(callback) callback();
 	};
-	function webpackContext(req) {
-		return __webpack_require__(webpackContextResolve(req));
-	};
-	function webpackContextResolve(req) {
-		return map[req] || (function() { throw new Error("Cannot find module '" + req + "'.") }());
-	};
-	webpackContext.keys = function webpackContextKeys() {
-		return Object.keys(map);
-	};
-	webpackContext.resolve = webpackContextResolve;
-	module.exports = webpackContext;
-	webpackContext.id = 8;
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by czzou on 2016/7/22.
-	 */
-	var Q=__webpack_require__(2);
-	var progress=__webpack_require__(10);
-	function fetch(data){
-	    var dfd= Q.defer();
-	    var max=data.max;
-	    var num=0;
-	    var try_time=0;
-	    var timer=setInterval(function(){
-	        num=$(".imgitem").length;
-	        if(num<max && try_time<40){
-	            //滚屏到最下方，若有moreBtn，则点击
-	            document.body.scrollTop=9999999;
-	            try_time++;
-	        }
-	        else {
-	            clearInterval(timer);
-	            dfd.resolve(getImageUrls());
-	            return;
-	        }
-	        data.urls=getImageUrls();
-	        //更新进度
-	        progress(data);
-	    },2000);
-	    function getImageUrls(){
-	        var urls=[];
-	        $(".imgitem").each(function(_index,item){
-	            if(urls.length<max){
-	                var href=$(item).attr("data-objurl")
-	                if(!/^http:\/\//.test(href)) return;
-	                urls.push({
-	                    url:href,
-	                    selected:true
-	                });
-	            }
-	        });
-	        return urls;
-	    }
-	    return dfd.promise;
-	}
-
-	module.exports=fetch;
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by zm on 2016/7/23.
-	 */
-	var utils=__webpack_require__(5);
-	var ACTION=utils.ACTION;
-	module.exports=function(data){
-	    chrome.runtime.sendMessage({action:ACTION.FETCH_PROGTRESS, data:data}); //发送给background
-	}
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/**
-	 * Created by czzou on 2016/7/22.
-	 */
-	var Q=__webpack_require__(2);
-	function fetch(max){
-	    var dfd= Q.defer();
-	    var num=0;
-	    var try_time=0;
-	    var timer=setInterval(function(){
-	        num=$("a[href*='/imgres']").length;
-	        if(num<max && try_time<5){
-	            //滚屏到最下方，若有moreBtn，则点击
-	            document.body.scrollTop=9999999;
-	            var moreBtn=$("#smb");
-	            if(moreBtn.length>0){
-	                moreBtn.click();
-	            }
-	            try_time++;
-	        }
-	        else {
-	            clearInterval(timer);
-	            dfd.resolve(getImageUrls());
-	        }
-	    },3000);
-	    function getImageUrls(){
-	        var urls=[];
-	        $("a[href*='/imgres']").each(function(_index,item){
-	            if(urls.length<=max){
-	                var href=$(item).attr("href");
-	                href=href.match(/imgurl=(http[^&]+?)&/);
-	                if(!href || !href[1]){
-	                    return;
-	                }
-	                href= unescape(href[1]);
-	                urls.push(href);
-	            }
-	        });
-	        return urls;
-	    }
-	    return dfd.promise;
-	}
-
-	module.exports=fetch;
+	module.exports=saveFile;
 
 /***/ }
 /******/ ]);

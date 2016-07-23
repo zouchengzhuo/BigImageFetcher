@@ -3,23 +3,26 @@
  */
 
 var Q=require('q');
-var ACTION=require('../utils').ACTION;
+var utils=require('../utils');
+var ACTION=utils.ACTION;
+var SITES=utils.SITES;
+
 
 var fetcher;
-if(location.host.indexOf("google.com")>-1){
-    fetcher=require('./fetchors/google_image.js');
-}
-else{
-    console.error("未实现此站点抓取！")
-}
-//fetcher(500).then(function(data){
-//    console.log(data)
-//}).done()
-chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
-    alert(1)
-    console.log("=== message inject===",request)
-    if(request.action!==ACTION.START_FETCH) return;
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
     var data=request.data;
-    console.log(data);
-
+    //开始抓取
+    if(request.action==ACTION.START_FETCH){
+        var site=SITES.getSite(data.site);
+        if(!site){
+            sendResponse({err:1,message:"未实现此网页抓取"});
+            return;
+        }
+        sendResponse({err:0});
+        fetcher=require('./fetchors/'+data.site);
+        fetcher(data).then(function(urls){
+            data.urls=urls;
+            chrome.runtime.sendMessage({action:ACTION.FETCH_SUCCESS, data:data}); //发送给background
+        }).done()
+    }
 });
