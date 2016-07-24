@@ -2541,6 +2541,8 @@
 	    event.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
 	    save_link.dispatchEvent(event);
 	    URL.revokeObjectURL(url);
+	    if(callback) setTimeout(callback,2000);
+
 	};
 	module.exports=saveFile;
 
