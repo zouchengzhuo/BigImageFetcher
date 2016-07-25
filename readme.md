@@ -1,6 +1,6 @@
 #安装插件
 ##step1.
-下载插件BigImageFetcher.zip。解压插件，得到BigImageFetcher文件夹。
+下载插件[BigImageFetcher.zip](http://3gimg.qq.com/trom_s/phsc/BigImageFetcher.zip "BigImageFetcher.zip")。解压插件，得到BigImageFetcher文件夹。
 （由于chrome浏览器的安全设置，现在已经不允许安装未发布的打包插件了，所以需要自己解压安装~）
 ##step2.
 打开chrome浏览器，在地址栏输入`chrome://extensions/`
