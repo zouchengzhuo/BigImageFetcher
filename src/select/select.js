@@ -1,11 +1,9 @@
 /**
  * Created by zm on 2016/7/24.
  */
-var Q=require('q');
+
 var Vue=require('vue');
-var getDataUrl=require('./fileOperate/getDataUrl');
-var getSuffix=require('./fileOperate/getSuffix');
-var saveFile=require('./fileOperate/saveFile');
+var formatDate=require('../utils').formatDate;
 
 var FETCH_ITEMS=chrome.extension.getBackgroundPage().FETCH_ITEMS;
 var tab_id=location.href.match(/tab_id=(\d+)/)[1];
@@ -63,7 +61,7 @@ var vm=window.vm=new Vue({
             })
         },
         download:function(){
-            var now=Date.now();
+            var now=formatDate(new Date(),'yyyy-MM-dd hh.mm.ss');
             fetch.urls.forEach(function(url){
                 if(!url.selected) return;
                 chrome.downloads.download({
