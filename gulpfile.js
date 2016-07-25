@@ -19,8 +19,8 @@ gulp.task('webpack-build',['concat-lib'],function () {
 });
 
 gulp.task('pack',function(){
-    gulp.src(['index.html','select.html','manifest.json',"icon.jpg",'./src/*','./dist/*'])
-        .pipe(gulp.dest('./pack'));
+    gulp.src(['index.html','select.html','manifest.json',"icon.jpg",'./src/*','./dist/*','./css/*'])
+        .pipe(gulp.dest('./BigImageFetcher'));
 
 });
 

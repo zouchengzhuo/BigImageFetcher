@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/google-bootstrap.css"/>
+    <title>选择图片</title>
+    <style>
+        *{
+            font-family: "Microsoft Yahei";
+        }
+        .img_item{
+            height: 150px;
+            margin: 5px;
+            border: solid 5px #ffffff;
+            cursor: pointer;
+            min-width: 80px;
+        }
+        .selected{
+            border: solid 5px #1FACFF;
+        }
+        .modal.fade {
+            top: -100%;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar navbar-inverse navbar-static-top">
+    <div class="navbar-inner">
+        <div class="container" style="width: auto; padding: 0 20px;">
+            <a class="brand" href="javascript:void(0)">筛选并下载图片</a>
+            <ul class="nav">
+                <li v-for="item in FETCH_ITEMS" :class="{'active':item.tab_id==tab_id}" track-by="$index">
+                    <a href="/select.html?tab_id={{item.tab_id}}">{{item.site.name}}-{{item.keyword}}</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="well  well-small clearfix" style="margin-top: 5px">
+    <div class="pull-right">
+        <button class="btn btn-info" v-on:click="selectAll"><i class="icon-ok-circle  icon-white"></i>全选</button>
+        <button class="btn btn-info" v-on:click="unselectAll"><i class="icon-remove-circle  icon-white"></i>反选</button>
+        <button class="btn btn-success" v-on:click="open_download_modal" v-bind:disabled="downloading"><i class="icon-download  icon-white"></i><span v-text="downloading?'下载中···':'下载'"></span>({{selectedNum}}/{{fetch.urls.length}})</button>
+    </div>
+</div>
+<div class="img_box clearfix">
+    <img crossOrigin="*" v-for="url in fetch.urls" alt="原图已丢失" v-on:click="select(url)" v-on:error="error(url)" v-on:load="load(url,$event)"  :class="['img_item',{'selected':url.selected}]" :src="url.url" track-by="$index" />
+</div>
+<div class="modal fade" :class="{'in':open_download}">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" v-on:click="close_download_modal" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">下载图片</h4>
+            </div>
+            <div class="modal-body">
+                <img src="img/setting.png" />
+                <p><button class="btn btn-link"  v-on:click="open_download_setting">打开Chrome下载设置</button></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" v-on:click="close_download_modal" class="btn btn-default" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-success" v-on:click="download" >下载</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+<script src="lib/vue-csp/vue.js"></script>
+<script type="text/javascript" src="lib/zip/zip.js"></script>
+<script type="text/javascript" src="lib/zip/zip-fs.js"></script>
+<script src="dist/select.js"></script>
+</body>
+</html>
