@@ -1,8 +1,8 @@
-#安装插件
-##step1.
+# 安装插件
+## step1.
 下载插件[BigImageFetcher.zip](http://3gimg.qq.com/trom_s/phsc/BigImageFetcher.zip "BigImageFetcher.zip")。解压插件，得到BigImageFetcher文件夹。
 （由于chrome浏览器的安全设置，现在已经不允许安装未发布的打包插件了，所以需要自己解压安装~）
-##step2.
+## step2.
 打开chrome浏览器，在地址栏输入`chrome://extensions/`
 
 ![](guide/1469430611066.png)
@@ -13,8 +13,8 @@
 
 插件列表中出现imagefetcher，右上角出现插件图标，说明插件加载成功
 
-#使用插件
-##开始抓取
+# 使用插件
+## 开始抓取
 点击上图中右上角的插件图标，输入抓取参数
 ![](guide/1469430832382.png)
 
@@ -26,13 +26,13 @@
 
 ![](guide/start.gif)
 
-##抓取结果
+## 抓取结果
 窗口打开完毕后，再次打开插件界面，可以看到下载进度
 
 ![](guide/fetch.gif)
 
 
-##筛选和下载
+## 筛选和下载
 抓取完毕后，点击`筛选` 可以进入筛选、下载图片界面
 ![](guide/1469431401300.png)
 
