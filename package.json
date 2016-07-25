@@ -8,6 +8,11 @@
     "q": "^1.4.1",
     "webpack": "^1.13.1"
   },
+  "author": {
+    "name": "czzou",
+    "email": "czzou@tencent.com",
+    "url": "http://km.oa.com/user/czzou"
+  },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
