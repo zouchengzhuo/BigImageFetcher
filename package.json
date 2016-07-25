@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "gulp": "^3.9.1",
     "q": "^1.4.1",
     "webpack": "^1.13.1"
   },

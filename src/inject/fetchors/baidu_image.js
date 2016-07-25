@@ -8,9 +8,10 @@ function fetch(data){
     var max=data.max;
     var num=0;
     var try_time=0;
+    var try_time_limit=60;
     var timer=setInterval(function(){
         num=$(".imgitem").length;
-        if(num<max && try_time<40){
+        if(num<max && try_time<try_time_limit){
             //滚屏到最下方，若有moreBtn，则点击
             document.body.scrollTop=9999999;
             try_time++;

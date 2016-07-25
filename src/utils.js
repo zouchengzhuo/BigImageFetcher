@@ -27,7 +27,7 @@ var SITES=[
         name:"谷歌图片",
         value:"google_image",
         createUrl:function(data){
-            return "http://image.baidu.com/search/index?tn=baiduimage&word="+encodeURIComponent(data.keyword);
+            return "https://www.google.com.hk/search?tbm=isch&q="+encodeURIComponent(data.keyword);
         }
     }
 ];

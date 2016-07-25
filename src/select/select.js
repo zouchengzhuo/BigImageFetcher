@@ -21,6 +21,7 @@ var vm=window.vm=new Vue({
     el: 'body',
     data: {
         downloading:false,
+        open_download:false,
         tab_id:tab_id,
         selectedNum:fetch.urls.length,
         fetch:fetch,
@@ -50,63 +51,42 @@ var vm=window.vm=new Vue({
         load:function(url,e){
             url.img=e.srcElement;
         },
+        open_download_modal:function(){
+            this.open_download=true;
+        },
+        close_download_modal:function(){
+            this.open_download=false;
+        },
+        open_download_setting:function(){
+            chrome.tabs.create({
+                url: "chrome://settings/search#下载前询问每个文件的保存位置"
+            })
+        },
         download:function(){
-            vm.downloading=true;
-            zip.useWebWorkers = true;
-            zip.workerScriptsPath = './lib/zip/';
-            var zipFs = new zip.fs.FS();
-
-            var queue=[];
-            //获取dataurl
+            var now=Date.now();
             fetch.urls.forEach(function(url){
                 if(!url.selected) return;
-                queue.push(getDataUrl(url));
-            });
-            //存入zi
+                chrome.downloads.download({
+                    url: url.url,
+                    filename: fetch.keyword+"_"+fetch.site.name+"_"+now + "/" + getFileName(url.url),
+                    saveAs: false,
+                    conflictAction: "uniquify"
+                }, function(f) {
 
-
-            Q.all(queue).then(function(data){
-                data.forEach(function(item,index){
-                    if(item==-1) return;
-                    zipFs.root.addData64URI(index+getSuffix(item),item);
                 });
-            }).done(function(){
-                //下载
-                //zipFs.exportData64URI
-                zipFs.exportBlob(function(zippedDataURI){
-                    saveFile(zippedDataURI,fetch.keyword+"_"+fetch.site.name+"_"+new Date().getTime()+".zip",function(){
-                        vm.downloading=false;
-                    });
-                    //saveFile(zippedDataURI,new Date().getTime()+".zip");
-                },function(){},function(){
-                    alert("下载出错")
-                })
             });
-            //var queue=Q(-1);
-            //var index=1;
-            //fetch.urls.forEach(function(url){
-            //    if(!url.selected) return;
-            //    queue=queue.then(function(){
-            //        return getDataUrl(url)
-            //    }).then(function(data){
-            //        if(data==-1) return;
-            //        zipFs.root.addData64URI((index++)+getSuffix(data),data);
-            //    })
-            //});
-            //queue.then(function(){
-            //    //下载
-            //    zipFs.exportBlob(function(zippedBlob){
-            //        saveFile(zippedBlob,fetch.keyword+"_"+fetch.site.name+"_"+new Date().getTime()+".zip",function(){
-            //            vm.downloading=false;
-            //        });
-            //        //saveFile(zippedDataURI,new Date().getTime()+".zip");
-            //    },function(){},function(){
-            //        alert("下载出错")
-            //    })
-            //}).done();
+            this.open_download=false;
         }
     }
 });
+function getFileName(url){
+    var reg=/[^/]+?\.(?:jpg|jpeg|png|bmp|gif|ico)/;
+    var name=url.match(reg);
+    if(!name){
+        return Date.now()+".png";
+    }
+    return name[0];
+}
 function updateNum(){
     var num=fetch.urls.filter(function(item){return item.selected}).length;
     vm.selectedNum=num;

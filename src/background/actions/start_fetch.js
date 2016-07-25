@@ -28,7 +28,7 @@ module.exports=function(data){
                 data:data
             }, function(response) {
                 clearInterval(__timer);
-                if(response.err==0){
+                if(response && response.err==0){
                     dfd.resolve(data);
                 }
                 else{
