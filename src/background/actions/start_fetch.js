@@ -32,8 +32,12 @@ module.exports=function(data){
                     dfd.resolve(data);
                 }
                 else{
-                    data.message=response.message;
-                    dfd.reject(data);
+                    //if(data){
+                    //    data.message=response.message;
+                    //}
+                    //dfd.reject(data);
+                    console.error("==== null callbakc of message =====");
+                    return;
                 }
             });
             __max_try_num--;

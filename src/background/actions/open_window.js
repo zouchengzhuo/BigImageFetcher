@@ -25,7 +25,10 @@ function getTabId(data){
     chrome.tabs.query({active:true,currentWindow:true},function(tab){
         var tab_id=tab[0].id;
         data.tab_id=tab_id;
-        dfd.resolve(data);
+        //延时1s等待网页加载完毕
+        setTimeout(function(){
+            dfd.resolve(data);
+        },1000);
     });
     return dfd.promise;
 }
